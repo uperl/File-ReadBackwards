@@ -36,3 +36,9 @@ Revision history for Perl extension File::ReadBackwards.
 
       fixed bug in close method and added test for close
 		- from Robin Houston <robin@kitsite.com>
+
+0.96  Sun May 26 00:28:49 EDT 2002
+
+      D'oh! call CORE::close inside close(). robin had it correct
+      in his patch and i didn't use that.
+

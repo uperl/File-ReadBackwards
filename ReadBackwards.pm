@@ -7,7 +7,7 @@ use strict ;
 
 use vars qw( $VERSION ) ;
 
-$VERSION = '0.96' ;
+$VERSION = '0.97' ;
 
 package File::ReadBackwards ;
 
@@ -194,7 +194,7 @@ sub close {
 
 	my ( $self ) = @_ ;
 
-	close( $self->{'handle'} ) ;
+	CORE::close( $self->{'handle'} ) ;
 }
 
 __END__
