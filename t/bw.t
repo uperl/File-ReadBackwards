@@ -93,6 +93,8 @@ sub test_read_backwards {
 		push( @bw_file_lines, $line)
 				while defined( $line = $bw->readline() ) ;
 
+		$bw->close() ;
+
 		if ( join( '', @rev_file_lines ) eq
 		     join( '', @bw_file_lines ) ) {
 
