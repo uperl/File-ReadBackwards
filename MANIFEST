@@ -2,4 +2,5 @@ Changes
 MANIFEST
 Makefile.PL
 ReadBackwards.pm
+README
 t/bw.t

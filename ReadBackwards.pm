@@ -7,7 +7,7 @@ use strict ;
 
 use vars qw( $VERSION ) ;
 
-$VERSION = '0.92' ;
+$VERSION = '0.94' ;
 
 package File::ReadBackwards ;
 
@@ -93,8 +93,8 @@ sub new {
 			'lines'		=> [],
 			'is_crlf'	=> $is_crlf,
 			'rec_sep'	=> $rec_sep,
-			'rec_regex'	=> qr/(.*?$rec_sep|.+)/s,
-
+# removed use of qr// for macperl
+#			'rec_regex'	=> qr/(.*?$rec_sep|.+)/s,
 
 		}, $class ;
 
@@ -166,7 +166,9 @@ sub readline {
 # this may want to be $/ but reading files backwards assumes plain text and
 # newline separators
 
-		@{$lines_ref} = $text =~ /$self->{'rec_regex'}/g ;
+# fix to remove use of qr//
+#		@{$lines_ref} = $text =~ /$self->{'rec_regex'}/g ;
+		@{$lines_ref} = $text =~ /(.*?$self->{'rec_sep'}|.+)/gs ;
 
 #print "Lines \n=>", join( "<=\n=>", @{$lines_ref} ), "<=\n" ;
 
@@ -174,7 +176,12 @@ sub readline {
 
 		if ( $self->{'is_crlf'} ) {
 
-			s/\015\012/\n/ for @{$lines_ref} ;
+# another macperl fix. no 5.005 stuff.
+#			s/\015\012/\n/ for @{$lines_ref} ;
+
+			for ( @{$lines_ref} ) {
+				s/\015\012/\n/ ;
+			}
 		}
 
 	}
@@ -218,9 +225,10 @@ memory efficient and fast. It supports both an object and a tied handle
 interface.
 
 It is intended for processing log and other similar text files which
-typically have their newest entries appended to them. Files can have any
-record separator string (as with $/) which is file specific and
-defaults to a value suitable to the OS.
+typically have their newest entries appended to them. By default files
+are assumed to be plain text and have a line ending appropriate to the
+OS. But you can set the input record separator string on a per file
+basis.
 
 
 =head1 OBJECT INTERFACE

@@ -1,5 +1,16 @@
 Revision history for Perl extension File::ReadBackwards.
 
-0.01  Mon Feb 28 21:37:29 2000
+0.90  Mon Feb 28 21:37:29 2000
 	- original version; created by h2xs 1.19
 
+0.91  fixed test suite
+
+0.92  edited documentation
+
+0.93  Tue Mar  7 23:31:40 EST 2000
+      removed use of qr// so it works under MacPerl
+      added README
+      edited documentation
+
+0.94  Wed Mar  8 00:12:28 EST 2000
+      removed use of for modifier so it works under MacPerl
