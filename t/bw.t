@@ -47,6 +47,8 @@ sub init_data {
 				"abcdefghijRS",
 				"abcdefghijRS" x 512,
 				'a' x (8 * 1024),
+				'a' x (8 * 1024) . '0',
+				'0' x (8 * 1024) . '0',
 				'a' x (32 * 1024),
 				join( 'RS', '00' .. '99', '' ),
 				join( 'RS', '00' .. '99' ),

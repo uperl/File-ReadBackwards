@@ -7,7 +7,7 @@ use strict ;
 
 use vars qw( $VERSION ) ;
 
-$VERSION = '0.97' ;
+$VERSION = '0.98' ;
 
 package File::ReadBackwards ;
 
@@ -158,7 +158,8 @@ sub readline {
 
 # prepend the read buffer to the leftover (possibly partial) line
 
-		my $text = $read_buf . ( pop @{$lines_ref} || '' ) ;
+		my $text = $read_buf ;
+		$text .= shift @{$lines_ref} if @{$lines_ref} ;
 
 # split the buffer into a list of lines
 # this may want to be $/ but reading files backwards assumes plain text and
