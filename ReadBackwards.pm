@@ -7,7 +7,7 @@ use strict ;
 
 use vars qw( $VERSION ) ;
 
-$VERSION = '0.98' ;
+$VERSION = '0.99' ;
 
 package File::ReadBackwards ;
 
@@ -106,11 +106,13 @@ sub readline {
 
 	my( $self, $line_ref ) = @_ ;
 
-		my $read_buf ;
+	my $read_buf ;
 
 # get the buffer of lines
 
 	my $lines_ref = $self->{'lines'} ;
+
+	return unless $lines_ref ;
 
 	while( 1 ) {
 
@@ -196,6 +198,9 @@ sub close {
 	my ( $self ) = @_ ;
 
 	CORE::close( $self->{'handle'} ) ;
+
+	delete( $self->{'handle'} ) ;
+	delete( $self->{'lines'} ) ;
 }
 
 __END__

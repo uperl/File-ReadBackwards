@@ -1,19 +1,20 @@
 #!/usr/local/bin/perl -ws
 
 use strict ;
-use Test ;
+use Test::More ;
 use File::ReadBackwards ;
 use Carp ;
 
 use vars qw( $opt_v ) ;
 
-my( $file, @nl_data, @crlf_data ) ;
+my $file = 'bw.data' ;
+
+my( @nl_data, @crlf_data ) ;
 
 init_data() ;
 
-plan( tests => 2 * @nl_data ) ;
 
-$file = 'bw.data' ;
+plan( tests => 2 * @nl_data + 1 ) ;
 
 print "nl\n" ;
 
@@ -24,6 +25,8 @@ print "crlf\n" ;
 test_read_backwards( \@crlf_data, "\015\012" ) ;
 
 unlink $file ;
+
+test_close() ;
 
 exit ;
 
@@ -114,6 +117,29 @@ sub test_read_backwards {
 	#		print unpack( 'H*', join '',@bw_file_lines ), "\n" ;
 		}
 	}
+}
+
+sub test_close {
+
+	write_file( $file, <<BW ) ;
+line1
+line2
+BW
+
+	my $bw = File::ReadBackwards->new( $file ) or
+					die "can't open $file: $!" ;
+
+	my $line = $bw->readline() ;
+
+	$bw->close() ;
+
+	if ( $bw->readline() ) {
+
+		ok( 0, 'close' ) ;
+		return ;
+	}
+
+	ok( close ) ;
 }
 
 sub read_file {

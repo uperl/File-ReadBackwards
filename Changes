@@ -47,4 +47,9 @@ Revision history for Perl extension File::ReadBackwards.
       fixed bug with a partial buffer of '0'.
 		- from Joe Schaefer <joe+usenet@sunstarsys.com>
 
+0.99  Tue Dec  3 00:50:23 EST 2002
+
+      fixed bug where readline returns data after a close
+		- from Khamdy <xayaraj@speedfactory.net>
+
 
