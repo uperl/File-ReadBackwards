@@ -14,7 +14,7 @@ my( @nl_data, @crlf_data ) ;
 init_data() ;
 
 
-plan( tests => 2 * @nl_data + 1 ) ;
+plan( tests => 4 * @nl_data + 1 ) ;
 
 print "nl\n" ;
 
@@ -116,6 +116,25 @@ sub test_read_backwards {
 	#		print unpack( 'H*', join '',@rev_file_lines ), "\n" ;
 	#		print unpack( 'H*', join '',@bw_file_lines ), "\n" ;
 		}
+
+		$bw = File::ReadBackwards->new( $file, @sep_arg ) or
+					die "can't open $file: $!" ;
+		my $line1 = $bw->readline() ;
+		my $pos = $bw->tell() ;
+		if ( !$bw->eof() ) {
+			local $/ ;
+			if ( $rec_sep ) {
+				$/ = $rec_sep;
+			}
+			open FH, $file or die $! ;
+			seek FH, $pos, 0 ;
+			my $line2 = <FH> ;
+			is ( $line1, $line2, "tell check" ) ;
+		}
+		else {
+			ok( 1, "skip tell check" ) ;
+		}
+
 	}
 }
 
@@ -139,7 +158,7 @@ BW
 		return ;
 	}
 
-	ok( close ) ;
+	ok( 1, 'close' ) ;
 }
 
 sub read_file {

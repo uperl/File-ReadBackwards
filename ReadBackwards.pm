@@ -1,15 +1,16 @@
 # File::ReadBackwards.pm
 
-# Copyright (C) 2002 by Uri Guttman. All rights reserved.
+# Copyright (C) 2003 by Uri Guttman. All rights reserved.
 # mail bugs, comments and feedback to uri@stemsystems.com
+
+package File::ReadBackwards ;
 
 use strict ;
 
 use vars qw( $VERSION ) ;
 
-$VERSION = '0.99' ;
+$VERSION = '1.00' ;
 
-package File::ReadBackwards ;
 
 use Symbol ;
 use Fcntl ;
@@ -48,6 +49,7 @@ BEGIN {
 	*READLINE = \&readline ;
  	*EOF = \&eof ;
  	*CLOSE = \&close ;
+ 	*TELL = \&tell ;
 }
 
 
@@ -193,6 +195,13 @@ sub eof {
 	return( $seek_pos == 0 && $lines_count == 0 ) ;
 }
 
+sub tell {
+	my ( $self ) = @_ ;
+
+	my $seek_pos = $self->{'seek_pos'} ;
+	$seek_pos + length(join "", @{ $self->{'lines'} });
+}
+
 sub close {
 
 	my ( $self ) = @_ ;
@@ -232,7 +241,7 @@ File::ReadBackwards.pm -- Read a file backwards by lines.
 
     # Tied Handle Interface
 
-    tie *BW, File::ReadBackwards, 'log_file' or
+    tie *BW, 'File::ReadBackwards', 'log_file' or
 			die "can't read 'log_file' $!" ;
 
     while( <BW> ) {
@@ -281,15 +290,20 @@ iterated through the whole file.
 
 close takes no arguments and it closes the handle
 
+=head2 tell
+
+tell takes no arguments and it returns the current filehandle position.
+This value may be used to seek() back to this position using a normal
+file handle.
 
 =head1 TIED HANDLE INTERFACE
 
-=head2 tie( *HANDLE, File::ReadBackwards, $file, [$rec_sep], [$sep_is_regex] )
+=head2 tie( *HANDLE, 'File::ReadBackwards', $file, [$rec_sep], [$sep_is_regex] )
  
 
-The TIEHANDLE, READLINE, EOF and CLOSE methods are aliased to the new,
-readline, eof and close methods respectively so refer to them for
-their arguments and API.  Once you have tied a handle to
+The TIEHANDLE, READLINE, EOF, CLOSE and TELL methods are aliased to
+the new, readline, eof, close and tell methods respectively so refer
+to them for their arguments and API.  Once you have tied a handle to
 File::ReadBackwards the only I/O operation permissible is <> which
 will read the previous line. You can call eof() and close() on the
 tied handle as well. All other tied handle operations will generate an
@@ -345,12 +359,12 @@ a file to the beginning.
 =head1 AUTHOR
  
 
-Uri Guttman, uri@sysarch.com
+Uri Guttman, uri@stemsystems.com
 
 =head1 COPYRIGHT
  
 
-Copyright (C) 2000 by Uri Guttman. All rights reserved.  This program is
+Copyright (C) 2003 by Uri Guttman. All rights reserved.  This program is
 free software; you can redistribute it and/or modify it under the same
 terms as Perl itself.
 

@@ -52,4 +52,12 @@ Revision history for Perl extension File::ReadBackwards.
       fixed bug where readline returns data after a close
 		- from Khamdy <xayaraj@speedfactory.net>
 
+1.00  Mon Aug 18 02:04:24 EDT 2003
+
+      fixed doc bug for the tied interface. the module name needs quotes
+		- from  Madeleine Price <mad@ugcs.caltech.edu>
+
+      added support for the tell method (including tests)
+		- Slaven Rezic <srezic@iconmobile.net>
+
 
