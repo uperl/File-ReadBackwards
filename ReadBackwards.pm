@@ -9,11 +9,10 @@ use strict ;
 
 use vars qw( $VERSION ) ;
 
-$VERSION = '1.02' ;
-
+$VERSION = '1.03' ;
 
 use Symbol ;
-use Fcntl ;
+use Fcntl qw( :seek O_RDONLY ) ;
 use Carp ;
 use integer ;
 
@@ -77,7 +76,7 @@ sub new {
 
 # seek to the end of the file and get its size
 
-	my $seek_pos = sysseek( $handle, 0, 2 ) or return ;
+	my $seek_pos = sysseek( $handle, 0, SEEK_END ) or return ;
 
 # get the size of the first block to read,
 # either a trailing partial one (the % size) or full sized one (max read size)
@@ -160,7 +159,7 @@ sub readline {
 # seek to the beginning of this block and save the new seek position
 
 		$seek_pos -= $read_size ;
-		sysseek( $handle, $seek_pos, 0 ) ;
+		sysseek( $handle, $seek_pos, SEEK_SET ) ;
 		$self->{'seek_pos'} = $seek_pos ;
 
 # read in the next (previous) block of text
@@ -199,6 +198,14 @@ sub tell {
 
 	my $seek_pos = $self->{'seek_pos'} ;
 	$seek_pos + length(join "", @{ $self->{'lines'} });
+}
+
+sub get_handle {
+	my ( $self ) = @_ ;
+
+	my $handle = $self->{handle} ;
+	seek( $handle, $self->tell, SEEK_SET ) ;
+	return $handle ;
 }
 
 sub close {
@@ -294,6 +301,17 @@ close takes no arguments and it closes the handle
 tell takes no arguments and it returns the current filehandle position.
 This value may be used to seek() back to this position using a normal
 file handle.
+
+=head2 get_handle
+
+get_handle takes no arguments and it returns the internal Perl
+filehandle used by the File::ReadBackwards object.  This handle may be
+used to read the file forward. Its seek position will be set to the
+position that is returned by the tell() method.  Note that
+interleaving forward and reverse reads may produce unpredictable
+results.  The only use supported at present is to read a file backward
+to a certain point, then use 'handle' to extract the handle, and read
+forward from that point.
 
 =head1 TIED HANDLE INTERFACE
 

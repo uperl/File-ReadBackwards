@@ -72,3 +72,9 @@ Revision history for Perl extension File::ReadBackwards.
       fixed test problems with cr/lf files.
       modified module to better handle them and when the rec_sep is set
       all tests now work on unix and windows
+
+1.03 Mon Jan 24 17:57:54 EST 2005
+
+      added get_handle method and tests for it.
+		- Mark-Jason Dominus
+
