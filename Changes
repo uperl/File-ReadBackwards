@@ -14,3 +14,20 @@ Revision history for Perl extension File::ReadBackwards.
 
 0.94  Wed Mar  8 00:12:28 EST 2000
       removed use of for modifier so it works under MacPerl
+
+0.95  Fri Apr 26 13:48:40 EDT 2002
+      readline returns undef on a sysseek error so it fails cleanly on pipes
+		- from Carl Edwards <cedwards@vitesse.com>
+
+      added eof() method
+		- from Antti S Lankila <alankila@cc.helsinki.fi>
+
+      added flag to new() that marks the record separator as a regular
+      expression. that used to be the default behavior and now the
+      default is that is it a plain string like $/.
+		- from Robin Houston <robin@kitsite.com>
+
+      added close() method
+		- from kdamundson@mmm.com
+
+      updated pod to reflect the changes

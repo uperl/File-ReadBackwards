@@ -1,13 +1,13 @@
 # File::ReadBackwards.pm
 
-# Copyright (C) 2000 by Uri Guttman. All rights reserved.
-# mail bugs, comments and feedback to uri@sysarch.com
+# Copyright (C) 2002 by Uri Guttman. All rights reserved.
+# mail bugs, comments and feedback to uri@stemsystems.com
 
 use strict ;
 
 use vars qw( $VERSION ) ;
 
-$VERSION = '0.94' ;
+$VERSION = '0.95' ;
 
 package File::ReadBackwards ;
 
@@ -46,6 +46,8 @@ BEGIN {
 
 	*TIEHANDLE = \&new ;
 	*READLINE = \&readline ;
+ 	*EOF = \&eof ;
+ 	*CLOSE = \&close ;
 }
 
 
@@ -53,9 +55,7 @@ BEGIN {
 
 sub new {
 
-	my( $class, $filename, $rec_sep ) = @_ ;
-
-	my( $handle, $read_size, $seek_pos, $self, $rec_regex, $is_crlf ) ;
+	my( $class, $filename, $rec_sep, $sep_is_regex ) = @_ ;
 
 # check that we have a filename
 
@@ -64,28 +64,28 @@ sub new {
 # see if this file uses the default of a cr/lf separator
 # those files will get cr/lf converted to \n
 
-	$is_crlf = ! defined $rec_sep && $default_rec_sep eq "\015\012" ;
+	my $is_crlf = ! defined $rec_sep && $default_rec_sep eq "\015\012" ;
 
 	$rec_sep ||= $default_rec_sep ;
 
 # get a handle and open the file
 
-	$handle = gensym ;
+	my $handle = gensym ;
 	sysopen( $handle, $filename, O_RDONLY ) || return ;
 	binmode $handle ;
 
 # seek to the end of the file and get its size
 
-	$seek_pos = sysseek( $handle, 0, 2 ) ;
+	my $seek_pos = sysseek( $handle, 0, 2 ) or return ;
 
 # get the size of the first block to read,
 # either a trailing partial one (the % size) or full sized one (max read size)
 
-	$read_size = $seek_pos % $max_read_size || $max_read_size ;
+	my $read_size = $seek_pos % $max_read_size || $max_read_size ;
 
 # create the object
 
-	$self = bless {
+	my $self = bless {
 			'file_name'	=> $filename,
 			'handle'	=> $handle,
 			'read_size'	=> $read_size,
@@ -93,8 +93,7 @@ sub new {
 			'lines'		=> [],
 			'is_crlf'	=> $is_crlf,
 			'rec_sep'	=> $rec_sep,
-# removed use of qr// for macperl
-#			'rec_regex'	=> qr/(.*?$rec_sep|.+)/s,
+			'sep_is_regex'	=> $sep_is_regex,
 
 		}, $class ;
 
@@ -107,12 +106,11 @@ sub readline {
 
 	my( $self, $line_ref ) = @_ ;
 
-	my( $handle, $lines_ref, $seek_pos, $read_cnt, $read_buf,
-	    $file_size, $read_size, $text ) ;
+		my $read_buf ;
 
 # get the buffer of lines
 
-	$lines_ref = $self->{'lines'} ;
+	my $lines_ref = $self->{'lines'} ;
 
 	while( 1 ) {
 
@@ -127,7 +125,7 @@ sub readline {
 
 # we don't have a complete, so have to read blocks until we do
 
-		$seek_pos = $self->{'seek_pos'} ;
+		my $seek_pos = $self->{'seek_pos'} ;
 
 # see if we are at the beginning of the file
 
@@ -141,8 +139,8 @@ sub readline {
 
 # we have to read more text so get the handle and the current read size
 
-		$handle = $self->{'handle'} ;
-		$read_size = $self->{'read_size'} ;
+		my $handle = $self->{'handle'} ;
+		my $read_size = $self->{'read_size'} ;
 
 # after the first read, always read the maximum size
 
@@ -156,19 +154,19 @@ sub readline {
 
 # read in the next (previous) block of text
 
-		$read_cnt = sysread( $handle, $read_buf, $read_size ) ;
+		my $read_cnt = sysread( $handle, $read_buf, $read_size ) ;
 
 # prepend the read buffer to the leftover (possibly partial) line
 
-		$text = $read_buf . ( pop @{$lines_ref} || '' ) ;
+		my $text = $read_buf . ( pop @{$lines_ref} || '' ) ;
 
 # split the buffer into a list of lines
 # this may want to be $/ but reading files backwards assumes plain text and
 # newline separators
 
-# fix to remove use of qr//
-#		@{$lines_ref} = $text =~ /$self->{'rec_regex'}/g ;
-		@{$lines_ref} = $text =~ /(.*?$self->{'rec_sep'}|.+)/gs ;
+		@{$lines_ref} = ( $self->{'sep_is_regex'} ) ?
+	 		$text =~ /(.*?$self->{'rec_sep'}|.+)/gs :
+			$text =~ /(.*?\Q$self->{'rec_sep'}\E|.+)/gs ;
 
 #print "Lines \n=>", join( "<=\n=>", @{$lines_ref} ), "<=\n" ;
 
@@ -176,15 +174,27 @@ sub readline {
 
 		if ( $self->{'is_crlf'} ) {
 
-# another macperl fix. no 5.005 stuff.
-#			s/\015\012/\n/ for @{$lines_ref} ;
-
 			for ( @{$lines_ref} ) {
 				s/\015\012/\n/ ;
 			}
 		}
-
 	}
+}
+
+sub eof {
+
+	my ( $self ) = @_ ;
+
+	my $seek_pos = $self->{'seek_pos'} ;
+	my $lines_count = @{ $self->{'lines'} } ;
+	return( $seek_pos == 0 && $lines_count == 0 ) ;
+}
+
+sub close {
+
+	my ( $self ) = @_ ;
+
+	$self->{'handle'}->close() ;
 }
 
 __END__
@@ -206,6 +216,12 @@ File::ReadBackwards.pm -- Read a file backwards by lines.
 
     while( defined( $log_line = $bw->readline ) ) {
 	    print $log_line ;
+    }
+
+    # ... or the alternative way of reading
+
+    until ( $bw->eof ) {
+	    print $bw->readline ;
     }
 
     # Tied Handle Interface
@@ -237,29 +253,42 @@ basis.
 There are only 2 methods in Backwards' object interface, new and
 readline.
 
-=head2 new( $file, [$rec_sep] )
+=head2 new( $file, [$rec_sep], [$sep_is_regex] )
 
-New takes as arguments a filename and an optional record separator. It
-either returns the object on a successful open or undef upon failure. $!
-is set to the error code if any.
+New takes as arguments a filename, an optional record separator and an
+optional flag that marks the record separator as a regular
+expression. It either returns the object on a successful open or undef
+upon failure. $!  is set to the error code if any.
 
 =head2 readline
 
-Readline takes no arguments and it returns the previous line in the file
-or undef when there are no more lines in the file.
+Readline takes no arguments and it returns the previous line in the
+file or undef when there are no more lines in the file. If the file is
+a non-seekable file (e.g. a pipe), then undef is returned.
+
+=head2 eof
+
+Eof takes no arguments and it returns true when readline() has
+iterated through the whole file.
+
+=head2 close
+
+close takes no arguments and it closes the handle
 
 
 =head1 TIED HANDLE INTERFACE
 
-=head2 tie( *HANDLE, File::ReadBackwards, $file, [$rec_sep] )
+=head2 tie( *HANDLE, File::ReadBackwards, $file, [$rec_sep], [$sep_is_regex] )
  
 
-The TIEHANDLE and READLINE methods are aliased to the new and readline
-methods respectively so refer to them for their arguments and API.  Once
-you have tied a handle to File::ReadBackwards the only operation
-permissible is <> which will read the previous line. All other tied
-handle operations will generate an unknown method error. Do not seek,
-write or perform any other operation other than <> on the tied handle.
+The TIEHANDLE, READLINE, EOF and CLOSE methods are aliased to the new,
+readline, eof and close methods respectively so refer to them for
+their arguments and API.  Once you have tied a handle to
+File::ReadBackwards the only I/O operation permissible is <> which
+will read the previous line. You can call eof() and close() on the
+tied handle as well. All other tied handle operations will generate an
+unknown method error. Do not seek, write or perform any other
+unsupported operations on the tied handle.
 
 =head1 LINE AND RECORD ENDINGS
  
@@ -269,6 +298,9 @@ portably seek and do block I/O without managing line ending conversions.
 This module supports the default record separators of normal line ending
 strings used by the OS. You can also set the separator on a per file
 basis.
+
+The record separator is a regular expression by default, which differs
+from the behavior of $/.
 
 Only if the record separator is B<not> specified and it defaults to
 CR/LF (e.g, VMS, redmondware) will it will be converted to a single
