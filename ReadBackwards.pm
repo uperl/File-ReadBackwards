@@ -7,7 +7,7 @@ use strict ;
 
 use vars qw( $VERSION ) ;
 
-$VERSION = '0.90' ;
+$VERSION = '0.92' ;
 
 package File::ReadBackwards ;
 
@@ -57,6 +57,10 @@ sub new {
 
 	my( $handle, $read_size, $seek_pos, $self, $rec_regex, $is_crlf ) ;
 
+# check that we have a filename
+
+	defined( $filename ) || return ;
+
 # see if this file uses the default of a cr/lf separator
 # those files will get cr/lf converted to \n
 
@@ -70,10 +74,9 @@ sub new {
 	sysopen( $handle, $filename, O_RDONLY ) || return ;
 	binmode $handle ;
 
-# seek to the end of the file
+# seek to the end of the file and get its size
 
-	sysseek( $handle, 0, 2 ) ;
-	$seek_pos = tell( $handle ) ;
+	$seek_pos = sysseek( $handle, 0, 2 ) ;
 
 # get the size of the first block to read,
 # either a trailing partial one (the % size) or full sized one (max read size)
@@ -182,17 +185,17 @@ __END__
 
 =head1 NAME
 
-Backwards.pm -- Read a file backwards by lines.
+File::ReadBackwards.pm -- Read a file backwards by lines.
  
 
-=head1 Synopsis
+=head1 SYNOPSIS
 
-    use Backwards ;
+    use File::ReadBackwards ;
 
     # Object interface
 
-    $bw = Backwards->new( 'log_file' ) or
-		    die "can't read 'log_file' $!" ;
+    $bw = File::ReadBackwards->new( 'log_file' ) or
+			die "can't read 'log_file' $!" ;
 
     while( defined( $log_line = $bw->readline ) ) {
 	    print $log_line ;
@@ -200,7 +203,8 @@ Backwards.pm -- Read a file backwards by lines.
 
     # Tied Handle Interface
 
-    tie *BW, 'log_file' or die "can't read 'log_file' $!" ;
+    tie *BW, File::ReadBackwards, 'log_file' or
+			die "can't read 'log_file' $!" ;
 
     while( <BW> ) {
 	    print ;
@@ -219,7 +223,7 @@ record separator string (as with $/) which is file specific and
 defaults to a value suitable to the OS.
 
 
-=head2 Object Interface
+=head1 OBJECT INTERFACE
  
 
 There are only 2 methods in Backwards' object interface, new and
@@ -237,7 +241,7 @@ Readline takes no arguments and it returns the previous line in the file
 or undef when there are no more lines in the file.
 
 
-=head2 Tied Handle Interface
+=head1 TIED HANDLE INTERFACE
 
 =head2 tie( *HANDLE, File::ReadBackwards, $file, [$rec_sep] )
  
@@ -249,19 +253,25 @@ permissible is <> which will read the previous line. All other tied
 handle operations will generate an unknown method error. Do not seek,
 write or perform any other operation other than <> on the tied handle.
 
-=head1 Line and Record Endings
+=head1 LINE AND RECORD ENDINGS
  
 
 Since this module needs to use low level I/O for efficiency, it can't
 portably seek and do block I/O without managing line ending conversions.
-This module supports the default record separators of normal
-line ending strings used on the OS. You can also set the separator on a
-per file basis. If the default separator is used and it is CR/LF (e.g,
-VMS, redmondware) it will be converted to a single newline. Unix and
-MacOS files systems use only a single character for line endings and the
-read lines are left unchanged.
+This module supports the default record separators of normal line ending
+strings used by the OS. You can also set the separator on a per file
+basis.
 
-=head1 Design
+Only if the record separator is B<not> specified and it defaults to
+CR/LF (e.g, VMS, redmondware) will it will be converted to a single
+newline. Unix and MacOS files systems use only a single character for
+line endings and the lines are left unchanged.  This means that for
+native text files, you should be able to process their lines backwards
+without any problems with line endings. If you specify a record
+separator, no conversions will be done and you will get the records as
+if you read them in binary mode.
+
+=head1 DESIGN
 
 It works by reading a large (8kb) block of data from the end of the
 file.  It then splits them on the record separator and stores a list of
@@ -274,7 +284,7 @@ line (no newline) it will be the first line returned and lines larger
 than the read buffer size are handled properly.
 
 
-=head1 Notes
+=head1 NOTES
  
 
 There is no support for list context in either the object or tied
@@ -286,12 +296,12 @@ backwards order (and you don't care about memory usage) just do:
 This module is only intended to read one line at a time from the end of
 a file to the beginning.
 
-=head1 Author
+=head1 AUTHOR
  
 
 Uri Guttman, uri@sysarch.com
 
-=head1 Copyright
+=head1 COPYRIGHT
  
 
 Copyright (C) 2000 by Uri Guttman. All rights reserved.  This program is
