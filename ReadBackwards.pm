@@ -9,7 +9,7 @@ use strict ;
 
 use vars qw( $VERSION ) ;
 
-$VERSION = '1.00' ;
+$VERSION = '1.02' ;
 
 
 use Symbol ;
@@ -66,9 +66,8 @@ sub new {
 # see if this file uses the default of a cr/lf separator
 # those files will get cr/lf converted to \n
 
-	my $is_crlf = ! defined $rec_sep && $default_rec_sep eq "\015\012" ;
-
 	$rec_sep ||= $default_rec_sep ;
+	my $is_crlf = $rec_sep eq "\015\012" ;
 
 # get a handle and open the file
 
@@ -123,6 +122,10 @@ sub readline {
 		if ( @{$lines_ref} > 1 ) {
 
 # we have a complete line so return it
+# and convert those damned cr/lf lines to \n
+
+			$lines_ref->[-1] =~ s/\015\012/\n/
+					if $self->{'is_crlf'} ;
 
 			return( pop @{$lines_ref} ) ;
 		}
@@ -137,6 +140,10 @@ sub readline {
 
 # the last read never made more lines, so return the last line in the buffer
 # if no lines left then undef will be returned
+# and convert those damned cr/lf lines to \n
+
+			$lines_ref->[-1] =~ s/\015\012/\n/
+					if @{$lines_ref} && $self->{'is_crlf'} ;
 
 			return( pop @{$lines_ref} ) ;
 		}
@@ -175,14 +182,6 @@ sub readline {
 
 #print "Lines \n=>", join( "<=\n=>", @{$lines_ref} ), "<=\n" ;
 
-# convert those damned cr/lf lines to \n
-
-		if ( $self->{'is_crlf'} ) {
-
-			for ( @{$lines_ref} ) {
-				s/\015\012/\n/ ;
-			}
-		}
 	}
 }
 
@@ -206,10 +205,10 @@ sub close {
 
 	my ( $self ) = @_ ;
 
-	CORE::close( $self->{'handle'} ) ;
-
-	delete( $self->{'handle'} ) ;
+	my $handle = delete( $self->{'handle'} ) ;
 	delete( $self->{'lines'} ) ;
+
+	CORE::close( $handle ) ;
 }
 
 __END__

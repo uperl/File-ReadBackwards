@@ -60,4 +60,15 @@ Revision history for Perl extension File::ReadBackwards.
       added support for the tell method (including tests)
 		- Slaven Rezic <srezic@iconmobile.net>
 
+1.01 Tue Oct  7 01:31:40 EDT 2003 (not released to cpan)
 
+      fixed bug in test script in close_test. the write_file fails on
+      winblows since the file is still open from the main loop. now the
+      file is closed explicitly and tests added to cover that.
+		- Peter J. Acklam <pjacklam@online.no>
+
+1.02 Fri Nov 21 01:53:42 EST 2003
+
+      fixed test problems with cr/lf files.
+      modified module to better handle them and when the rec_sep is set
+      all tests now work on unix and windows
