@@ -73,7 +73,6 @@ sub test_read_backwards {
 
 		test_data( $rec_sep ) ;
 
-
 		test_tell_handle( $rec_sep ) ;
 	}
 }
@@ -98,9 +97,20 @@ sub test_data {
 				die "can't open $file: $!" ;
 
 	my( @bw_file_lines ) ;
-	while ( defined( my $line = $bw->readline() ) ) {
-		push( @bw_file_lines, $line) ;
+	while ( 1 ) {
+
+		my $line = $bw->readline() ;
+		last unless defined( $line ) ;
+		push( @bw_file_lines, $line ) ;
+
+		$line = $bw->getline() ;
+		last unless defined( $line ) ;
+		push( @bw_file_lines, $line ) ;
 	}
+
+# 	while ( defined( my $line = $bw->readline() ) ) {
+# 		push( @bw_file_lines, $line) ;
+# 	}
 
 # see if we close cleanly
 

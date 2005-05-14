@@ -19,6 +19,7 @@ Revision history for Perl extension File::ReadBackwards.
       readline returns undef on a sysseek error so it fails cleanly on pipes
 		- from Carl Edwards <cedwards@vitesse.com>
 
+
       added eof() method
 		- from Antti S Lankila <alankila@cc.helsinki.fi>
 
@@ -77,4 +78,12 @@ Revision history for Perl extension File::ReadBackwards.
 
       added get_handle method and tests for it.
 		- Mark-Jason Dominus
+
+1.04 Thu May  5 01:10:44 EDT 2005
+
+      added getline method and tests for it
+		- Slaven Rezic <srezic@iconmobile.net>
+      added support and test for large files (>2GB)
+		- Slaven Rezic <srezic@iconmobile.net>
+
 

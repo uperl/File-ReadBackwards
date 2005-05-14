@@ -9,12 +9,11 @@ use strict ;
 
 use vars qw( $VERSION ) ;
 
-$VERSION = '1.03' ;
+$VERSION = '1.04' ;
 
 use Symbol ;
 use Fcntl qw( :seek O_RDONLY ) ;
 use Carp ;
-use integer ;
 
 my $max_read_size = 1 << 13 ;
 
@@ -49,6 +48,10 @@ BEGIN {
  	*EOF = \&eof ;
  	*CLOSE = \&close ;
  	*TELL = \&tell ;
+
+# added getline alias for compatibility with IO::Handle
+
+	*getline = \&readline ;
 }
 
 
@@ -270,41 +273,45 @@ basis.
 
 =head1 OBJECT INTERFACE
  
+These are the methods in C<File::ReadBackwards>' object interface:
 
-There are only 2 methods in Backwards' object interface, new and
-readline.
 
 =head2 new( $file, [$rec_sep], [$sep_is_regex] )
 
-New takes as arguments a filename, an optional record separator and an
-optional flag that marks the record separator as a regular
+C<new> takes as arguments a filename, an optional record separator and
+an optional flag that marks the record separator as a regular
 expression. It either returns the object on a successful open or undef
-upon failure. $!  is set to the error code if any.
+upon failure. $! is set to the error code if any.
 
 =head2 readline
 
-Readline takes no arguments and it returns the previous line in the
+C<readline> takes no arguments and it returns the previous line in the
 file or undef when there are no more lines in the file. If the file is
 a non-seekable file (e.g. a pipe), then undef is returned.
 
+=head2 getline
+
+C<getline> is an alias for the readline method. It is here for
+compatibilty with the IO::* classes which has a getline method.
+
 =head2 eof
 
-Eof takes no arguments and it returns true when readline() has
+C<eof> takes no arguments and it returns true when readline() has
 iterated through the whole file.
 
 =head2 close
 
-close takes no arguments and it closes the handle
+C<close> takes no arguments and it closes the handle
 
 =head2 tell
 
-tell takes no arguments and it returns the current filehandle position.
+C<tell> takes no arguments and it returns the current filehandle position.
 This value may be used to seek() back to this position using a normal
 file handle.
 
 =head2 get_handle
 
-get_handle takes no arguments and it returns the internal Perl
+C<get_handle> takes no arguments and it returns the internal Perl
 filehandle used by the File::ReadBackwards object.  This handle may be
 used to read the file forward. Its seek position will be set to the
 position that is returned by the tell() method.  Note that
