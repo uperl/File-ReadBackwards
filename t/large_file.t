@@ -5,15 +5,13 @@ use strict ;
 use Carp ;
 use Config ;
 use Fcntl qw( :seek ) ;
+use File::Temp qw( tempfile );
 use Test::More ;
 
 use File::ReadBackwards ;
 
 # NOTE: much of this code was taken from the core perl test script
 # ops/lfs.t. it was modified to test File::ReadBackwards and large files
-
-my %has_no_sparse_files = map { $_ => 1 }
-	qw( MSWin32 NetWare VMS unicos ) ;
 
 my $test_file = 'bw.data' ;
 
@@ -42,8 +40,8 @@ unless( $Config{uselargefiles} ) {
 	skip_all_tests( "no large file support\n" ) ;
 }
 
-if ( $has_no_sparse_files{ $^O } ) {
-	skip_all_tests( "no sparse files in $^O\n" ) ;
+unless ( have_sparse_files() ) {
+	skip_all_tests( "no sparse file support\n" ) ;
 }
 
 # run the long seek code below in a subprocess in case it exits with a
@@ -105,3 +103,71 @@ is( $line, $test_lines[-2], 'next to last line' ) ;
 unlink $test_file ;
 
 exit ;
+
+
+######## subroutines
+
+# this is lifted wholesale from t/op/lfs.t in perl.  Also, Uri is the
+# wind beneath my wings.
+sub have_sparse_files {
+
+     # don't even try for spare files on some OSs
+     return 0 if {
+         map { $_ => 1 } qw( MSWin32 NetWare VMS unicos )
+     }->{ $^O };
+     # take that, readability.
+
+     my (undef,$big0) = tempfile();
+     my (undef,$big1) = tempfile();
+     my (undef,$big2) = tempfile();
+
+     # We'll start off by creating a one megabyte file which has
+     # only three "true" bytes.  If we have sparseness, we should
+     # consume less blocks than one megabyte (assuming nobody has
+     # one megabyte blocks...)
+
+     open(BIG, ">$big1") or
+         die "open $big1 failed: $!";
+     binmode(BIG) or
+         die "binmode $big1 failed: $!";
+     seek(BIG, 1_000_000, SEEK_SET) or
+         die "seek $big1 failed: $!";
+     print BIG "big" or
+         die "print $big1 failed: $!";
+     close(BIG) or
+         die "close $big1 failed: $!";
+
+     my @s1 = stat($big1);
+
+ #    diag "s1 = @s1";
+
+     open(BIG, ">$big2") or
+         die "open $big2 failed: $!";
+     binmode(BIG) or
+         die "binmode $big2 failed: $!";
+     seek(BIG, 2_000_000, SEEK_SET) or
+         die "seek $big2 failed: $!";
+     print BIG "big" or
+         die "print $big2 failed: $!";
+     close(BIG) or
+         die "close $big2 failed: $!";
+
+     my @s2 = stat($big2);
+
+#     diag "s2 = @s2";
+
+     unless (
+         $s1[7] == 1_000_003 && $s2[7] == 2_000_003 &&
+	$s1[11] == $s2[11] && $s1[12] == $s2[12] &&
+         $s1[12] > 0 ) {
+#         diag 'no sparse files.  sad face.';
+         return 0;
+     }
+
+#     diag 'we seem to have sparse files...';
+
+     return 1 ;
+}
+
+
+
