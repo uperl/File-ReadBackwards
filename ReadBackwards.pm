@@ -1,6 +1,6 @@
 # File::ReadBackwards.pm
 
-# Copyright (C) 2003 by Uri Guttman. All rights reserved.
+# Copyright (C) 2000-2021 by Uri Guttman. All rights reserved.
 # mail bugs, comments and feedback to uri@stemsystems.com
 
 package File::ReadBackwards ;
@@ -227,7 +227,6 @@ __END__
 =head1 NAME
 
 File::ReadBackwards.pm -- Read a file backwards by lines.
- 
 
 =head1 SYNOPSIS
 
@@ -258,7 +257,6 @@ File::ReadBackwards.pm -- Read a file backwards by lines.
     }
 
 =head1 DESCRIPTION
-  
 
 This module reads a file backwards line by line. It is simple to use,
 memory efficient and fast. It supports both an object and a tied handle
@@ -270,11 +268,9 @@ are assumed to be plain text and have a line ending appropriate to the
 OS. But you can set the input record separator string on a per file
 basis.
 
-
 =head1 OBJECT INTERFACE
- 
-These are the methods in C<File::ReadBackwards>' object interface:
 
+These are the methods in C<File::ReadBackwards>' object interface:
 
 =head2 new( $file, [$rec_sep], [$sep_is_regex] )
 
@@ -323,7 +319,6 @@ forward from that point.
 =head1 TIED HANDLE INTERFACE
 
 =head2 tie( *HANDLE, 'File::ReadBackwards', $file, [$rec_sep], [$sep_is_regex] )
- 
 
 The TIEHANDLE, READLINE, EOF, CLOSE and TELL methods are aliased to
 the new, readline, eof, close and tell methods respectively so refer
@@ -335,7 +330,6 @@ unknown method error. Do not seek, write or perform any other
 unsupported operations on the tied handle.
 
 =head1 LINE AND RECORD ENDINGS
- 
 
 Since this module needs to use low level I/O for efficiency, it can't
 portably seek and do block I/O without managing line ending conversions.
@@ -367,9 +361,7 @@ conditions are handled correctly i.e. if there is a trailing partial
 line (no newline) it will be the first line returned and lines larger
 than the read buffer size are handled properly.
 
-
 =head1 NOTES
- 
 
 There is no support for list context in either the object or tied
 interfaces. If you want to slurp all of the lines into an array in
@@ -381,14 +373,14 @@ This module is only intended to read one line at a time from the end of
 a file to the beginning.
 
 =head1 AUTHOR
- 
 
-Uri Guttman, uri@stemsystems.com
+Original author: Uri Guttman, C<< uri@stemsystems.com >>
+
+Current maintainer: Graham Ollis C<< plicease@cpan.org >>
 
 =head1 COPYRIGHT
- 
 
-Copyright (C) 2003 by Uri Guttman. All rights reserved.  This program is
+Copyright (C) 2000-2021 by Uri Guttman. All rights reserved.  This program is
 free software; you can redistribute it and/or modify it under the same
 terms as Perl itself.
 
