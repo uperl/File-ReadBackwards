@@ -6,10 +6,9 @@
 package File::ReadBackwards ;
 
 use strict ;
+use warnings ;
 
-use vars qw( $VERSION ) ;
-
-$VERSION = '1.05' ;
+our $VERSION = '1.05' ;
 
 use Symbol ;
 use Fcntl qw( :seek O_RDONLY ) ;
