@@ -1,7 +1,7 @@
 #!/usr/local/bin/perl -ws
 
 use strict ;
-
+use warnings ;
 use Carp ;
 use Config ;
 use Fcntl qw( :seek ) ;

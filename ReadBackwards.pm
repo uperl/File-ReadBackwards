@@ -6,14 +6,11 @@
 package File::ReadBackwards ;
 
 use strict ;
-
-use vars qw( $VERSION ) ;
-
-$VERSION = '1.05' ;
-
 use Symbol ;
 use Fcntl qw( :seek O_RDONLY ) ;
 use Carp ;
+
+our $VERSION = '1.05' ;
 
 my $max_read_size = 1 << 13 ;
 
