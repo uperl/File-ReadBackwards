@@ -15,7 +15,7 @@ my $is_crlf = ( $^O =~ /win32/i || $^O =~ /vms/i ) ;
 
 print "nl\n" ;
 my @nl_data = init_data( "\n" ) ;
-plan( tests => 10 * @nl_data + 1 ) ;
+plan( tests => 20 * @nl_data + 1 ) ;
 test_read_backwards( \@nl_data ) ;
 
 print "crlf\n" ;
@@ -72,15 +72,34 @@ sub test_read_backwards {
 
 		}
 
-		test_data( $rec_sep ) ;
+        # Test File::ReadBackwards with a filename
+               
+        my $bw = File::ReadBackwards->new( $file, $rec_sep ) or
+            die "can't open $file: $!" ;
+        test_data( $bw, $rec_sep ) ;
+               
+        # Test File::ReadBackwards with a filehandle
+        open my $open_fh, '<', $file or
+            die "can't open $file: $!";
+        my $bw_open = File::ReadBackwards->new( $open_fh, $rec_sep );
+        test_data( $bw_open, $rec_sep ) ;
 
-		test_tell_handle( $rec_sep ) ;
+
+        # open the file backwards again to test tell and get_handle methods
+        $bw = File::ReadBackwards->new( $file, $rec_sep ) or
+            die "can't open $file: $!" ;
+        test_tell_handle( $bw, $rec_sep ) ;
+               
+        open $open_fh, '<', $file or
+            die "can't open $file: $!";
+        $bw_open = File::ReadBackwards->new( $open_fh, $rec_sep );
+        test_tell_handle( $bw_open, $rec_sep ) ;
 	}
 }
 
 sub test_data {
 
-	my( $rec_sep ) = @_ ;
+	my( $bw, $rec_sep ) = @_ ;
 
 # slurp in the file and reverse the list of lines to get golden data
 
@@ -93,9 +112,6 @@ sub test_data {
 	}
 
 # open the file with backwards and read in the lines
-
-	my $bw = File::ReadBackwards->new( $file, $rec_sep ) or
-				die "can't open $file: $!" ;
 
 	my( @bw_file_lines ) ;
 	while ( 1 ) {
@@ -142,12 +158,9 @@ sub test_data {
 
 sub test_tell_handle {
 
-	my( $rec_sep ) = @_ ;
+	my( $bw, $rec_sep ) = @_ ;
 
 # open the file backwards again to test tell and get_handle methods
-
-	my $bw = File::ReadBackwards->new( $file, $rec_sep ) or
-				die "can't open $file: $!" ;
 
 # read the last line in
 

@@ -9,11 +9,12 @@ use strict ;
 
 use vars qw( $VERSION ) ;
 
-$VERSION = '1.05' ;
+$VERSION = '1.06_01' ;
 
 use Symbol ;
 use Fcntl qw( :seek O_RDONLY ) ;
 use Carp ;
+use Scalar::Util 'openhandle';
 
 my $max_read_size = 1 << 13 ;
 
@@ -71,11 +72,18 @@ sub new {
 	$rec_sep ||= $default_rec_sep ;
 	my $is_crlf = $rec_sep eq "\015\012" ;
 
-# get a handle and open the file
+# get a handle and open the file or assign $filename to handle if
+# it is an already open filehandle
 
-	my $handle = gensym ;
-	sysopen( $handle, $filename, O_RDONLY ) || return ;
-	binmode $handle ;
+    my $handle;
+    if (openhandle( $filename ) ) {
+        $handle = $filename;
+    }
+    else {
+        $handle = gensym;        
+        sysopen( $handle, $filename, O_RDONLY ) || return;
+    }
+    binmode $handle;
 
 # seek to the end of the file and get its size
 
