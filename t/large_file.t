@@ -13,7 +13,7 @@ use File::ReadBackwards ;
 # NOTE: much of this code was taken from the core perl test script
 # ops/lfs.t. it was modified to test File::ReadBackwards and large files
 
-my $test_file = 'bw.data' ;
+my (undef, $test_file) = tempfile('bw-XXXXXX', SUFFIX => '.data', TMPDIR => 1, CLEANUP => 1);
 
 my @test_lines = (
 	"3rd from last line\n",

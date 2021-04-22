@@ -5,10 +5,11 @@ use Test::More ;
 use Fcntl qw( :seek ) ;
 use File::ReadBackwards ;
 use Carp ;
+use File::Temp qw( tempfile );
 
 use vars qw( $opt_v ) ;
 
-my $file = 'bw.data' ;
+my (undef, $file) = tempfile('bw-XXXXXX', SUFFIX => '.data', TMPDIR => 1, CLEANUP => 1);
 
 my $is_crlf = ( $^O =~ /win32/i || $^O =~ /vms/i ) ;
 
