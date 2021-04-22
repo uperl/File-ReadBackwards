@@ -45,6 +45,7 @@ jobs:
 
       - name: Run Tests
         run: |
+          cd $( cygpath -u $GITHUB_WORKSPACE )
           perl Makefile.PL
           make
           make test
