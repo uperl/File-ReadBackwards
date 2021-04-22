@@ -292,7 +292,7 @@ a non-seekable file (e.g. a pipe), then undef is returned.
 =head2 getline
 
 C<getline> is an alias for the readline method. It is here for
-compatibilty with the IO::* classes which has a getline method.
+compatibility with the IO::* classes which has a getline method.
 
 =head2 eof
 
