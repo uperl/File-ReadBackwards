@@ -104,7 +104,7 @@ sub new {
 # 
 sub readline {
 
-	my( $self, $line_ref ) = @_ ;
+	my( $self ) = @_ ;
 
 	my $read_buf ;
 
@@ -240,7 +240,7 @@ File::ReadBackwards.pm -- Read a file backwards by lines.
 
     # ... or the alternative way of reading
 
-    until ( $bw->eof ) {
+    while ( not $bw->eof ) {
 	    print $bw->readline ;
     }
 
@@ -269,42 +269,59 @@ basis.
 
 These are the methods in C<File::ReadBackwards>' object interface:
 
-=head2 new( $file, [$rec_sep], [$sep_is_regex] )
+=head2 new
 
-C<new> takes as arguments a filename, an optional record separator and
-an optional flag that marks the record separator as a regular
-expression. It either returns the object on a successful open or undef
-upon failure. $! is set to the error code if any.
+ my $bw = File::ReadBackwards->new($filename);
+ my $bw = File::ReadBackwards->new($filename, $separator);
+ my $bw = File::ReadBackwards->new($filename, $separator, $separator_is_regex);
+
+The C<new> constructor takes as arguments a filename, an optional record
+separator and an optional flag that marks the record separator as a regular
+expression (off by default). It either returns the object on a successful
+open or undef upon failure. $! is set to the error code if any.
 
 =head2 readline
 
-C<readline> takes no arguments and it returns the previous line in the
-file or undef when there are no more lines in the file. If the file is
+ my $line = $bw->readline;
+
+The C<readline> method takes no arguments and it returns the previous line
+in the file or undef when there are no more lines in the file. If the file is
 a non-seekable file (e.g. a pipe), then undef is returned.
 
 =head2 getline
 
-C<getline> is an alias for the readline method. It is here for
+ my $line = $bw->getline;
+
+The C<getline> method is an alias for the readline method. It is here for
 compatibility with the IO::* classes which has a getline method.
 
 =head2 eof
 
-C<eof> takes no arguments and it returns true when readline() has
+ my $bool = $bw->eof;
+
+The C<eof> method takes no arguments and it returns true when readline() has
 iterated through the whole file.
 
 =head2 close
 
-C<close> takes no arguments and it closes the handle
+ my $bool = $bw->close;
+
+The C<close> method takes no arguments and it closes the handle.  It returns
+false on failure and sets C<< $! >>, the same as the core close method.
 
 =head2 tell
 
-C<tell> takes no arguments and it returns the current filehandle position.
-This value may be used to seek() back to this position using a normal
+ my $pos = $bw->tell;
+
+The C<tell> method takes no arguments and it returns the current filehandle
+position. This value may be used to seek() back to this position using a normal
 file handle.
 
 =head2 get_handle
 
-C<get_handle> takes no arguments and it returns the internal Perl
+ my $fh = $bw->get_handle;
+
+The C<get_handle> method takes no arguments and it returns the internal Perl
 filehandle used by the File::ReadBackwards object.  This handle may be
 used to read the file forward. Its seek position will be set to the
 position that is returned by the tell() method.  Note that
@@ -315,7 +332,12 @@ forward from that point.
 
 =head1 TIED HANDLE INTERFACE
 
-=head2 tie( *HANDLE, 'File::ReadBackwards', $file, [$rec_sep], [$sep_is_regex] )
+ tie *HANDLE, 'File::ReadBackwards', $filename;
+ tie *HANDLE, 'File::ReadBackwards', $filename, $separator;
+ tie *HANDLE, 'File::ReadBackwards', $filename, $separator, $separator_is_regex;
+
+The C<$separator> and C<$separator_is_regex> are the same as passed into the
+C<new> method above.
 
 The TIEHANDLE, READLINE, EOF, CLOSE and TELL methods are aliased to
 the new, readline, eof, close and tell methods respectively so refer
@@ -368,6 +390,10 @@ backwards order (and you don't care about memory usage) just do:
 
 This module is only intended to read one line at a time from the end of
 a file to the beginning.
+
+=head1 CAVEATS
+
+The constructor should probably die instead of returning C<undef> on failure.
 
 =head1 AUTHOR
 
