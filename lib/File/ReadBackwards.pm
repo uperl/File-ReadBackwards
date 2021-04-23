@@ -265,6 +265,9 @@ are assumed to be plain text and have a line ending appropriate to the
 OS. But you can set the input record separator string on a per file
 basis.
 
+This module requires Perl 5.6 or better.  There are no non-core prerequisite
+modules.
+
 =head1 OBJECT INTERFACE
 
 These are the methods in C<File::ReadBackwards>' object interface:
