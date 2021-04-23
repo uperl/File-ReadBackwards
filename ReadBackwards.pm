@@ -10,7 +10,7 @@ use Symbol ;
 use Fcntl qw( :seek O_RDONLY ) ;
 use Carp ;
 
-our $VERSION = '1.05' ;
+our $VERSION = '1.06' ;
 
 my $max_read_size = 1 << 13 ;
 
