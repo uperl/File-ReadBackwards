@@ -3,7 +3,7 @@ use ExtUtils::MakeMaker;
 # the contents of the Makefile that is written.
 WriteMakefile(
     'NAME'	=> 'File::ReadBackwards',
-    'VERSION_FROM' => 'ReadBackwards.pm', # finds $VERSION
+    'VERSION_FROM' => 'lib/File/ReadBackwards.pm', # finds $VERSION
 
     META_MERGE => {
         'meta-spec' => { version => 2 },
