@@ -45,5 +45,6 @@ jobs:
       - name: Run Tests
         run: |
           perl Makefile.PL
-          make
-          make test
+          cat Makefile
+          gmake
+          gmake test
