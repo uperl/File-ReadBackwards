@@ -1,7 +1,5 @@
 # File::ReadBackwards.pm
-
 # Copyright (C) 2000-2021 by Uri Guttman. All rights reserved.
-# mail bugs, comments and feedback to uri@stemsystems.com
 
 package File::ReadBackwards ;
 
