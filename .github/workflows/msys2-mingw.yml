@@ -41,6 +41,7 @@ jobs:
       - name: perl -V
         run: |
           perl -V
+          perl -V:make
 
       - name: Run Tests
         run: |
