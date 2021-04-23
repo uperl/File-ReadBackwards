@@ -21,5 +21,5 @@ resources:
   bugtracker: https://github.com/uperl/File-ReadBackwards/issues
   homepage: https://metacpan.org/pod/File::ReadBackwards
   repository: https://github.com/uperl/File-ReadBackwards.git
-version: '1.05'
+version: '1.06'
 x_serialization_backend: 'CPAN::Meta::YAML version 0.018'
