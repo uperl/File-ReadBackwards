@@ -49,3 +49,8 @@ jobs:
           perl Makefile.PL
           make
           make test
+
+      - name: CPAN log
+        if: ${{ failure() }}
+        run: |
+          cip exec bash -c 'cat $HOME/.cpanm/latest-build/build.log'
